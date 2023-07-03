@@ -1,29 +1,66 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+import 'dart:core';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_builder_assert/main.dart';
+import 'package:golden_builder_assert/information.dart';
+import 'package:golden_toolkit/golden_toolkit.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('FilesetInformation', () {
+    setUpAll(() async {
+      await loadAppFonts();
+    });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    testGoldens('works - but last scenario is clipped vertically',
+        (tester) async {
+      final builder = GoldenBuilder.grid(
+        columns: 2,
+        widthToHeightRatio: 1,
+      )..addScenario(
+          'with one item',
+          const Information(version: '1.0.0'),
+        );
+      builder.addScenario(
+        'with two items',
+        const Information(version: '1.0.0', size: '42 Mb'),
+      );
+      builder.addScenario(
+        'with three items',
+        const Information(version: '1.0.0', size: '42 Mb', date: 'Jul 3 2023'),
+      );
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+      await tester.pumpWidgetBuilder(
+        Center(
+          child: builder.build(),
+        ),
+      );
+      await screenMatchesGolden(tester, 'grid.works');
+    });
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testGoldens('asserts in Flutter', (tester) async {
+    final builder = GoldenBuilder.grid(
+      columns: 2,
+      widthToHeightRatio: 1,
+      wrap: materialAppWrapper(), // also fails with custom MaterialApp wrapping
+    )..addScenario(
+        'with one item',
+        const Information(version: '1.0.0'),
+      );
+    builder.addScenario(
+      'with two items',
+      const Information(version: '1.0.0', size: '42 Mb'),
+    );
+    builder.addScenario(
+      'with three items',
+      const Information(version: '1.0.0', size: '42 Mb', date: 'Jul 3 2023'),
+    );
+
+    await tester.pumpWidgetBuilder(
+      Center(
+        child: builder.build(),
+      ),
+    );
+    await screenMatchesGolden(tester, 'grid.asserts');
   });
 }
