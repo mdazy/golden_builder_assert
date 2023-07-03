@@ -42,7 +42,7 @@ void main() {
     final builder = GoldenBuilder.grid(
       columns: 2,
       widthToHeightRatio: 1,
-      wrap: materialAppWrapper(), // also fails with custom MaterialApp wrapping
+      wrap: (widget) => MaterialApp(home: widget),
     )..addScenario(
         'with one item',
         const Information(version: '1.0.0'),
